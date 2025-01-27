@@ -13,3 +13,10 @@ export interface Stock {
 	marketCap: number;
 	website: string;
 }
+
+export interface IStockResult {
+	description: string;
+	displaySymbol: string;
+	symbol: string;
+	type: string;
+}

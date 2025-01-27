@@ -1,0 +1,13 @@
+.action {
+	background: #fff;
+	color: #000;
+}
+.action:hover {
+	background: #000;
+	color: #fff;
+}
+
+.button_root:focus {
+	border: none;
+	outline: none;
+}

@@ -1,9 +1,14 @@
 import axios from "axios";
 
-const API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+// const API_KEY = process.env.NEXT_PUBLIC_FINNHUB_API_KEY;
+const API_KEY = "cuadoepr01qof06i9vf0cuadoepr01qof06i9vfg";
+const API_KEY2 = process.env.NEXT_PUBLIC_ALPHA_API_KEY;
 
 const finnhubClient = axios.create({
 	baseURL: "https://finnhub.io/api/v1",
+});
+const alphaClient = axios.create({
+	baseURL: "https://www.alphavantage.co",
 });
 
 export const getStockPrice = async (symbol: string) => {
@@ -21,7 +26,21 @@ export const getStockPrice = async (symbol: string) => {
 	}
 };
 
-export const searchStocks = async (query: string) => {
+export const getCompanyProfile = async (symbol: string) => {
+	try {
+		const response = await finnhubClient.get("/stock/profile2", {
+			params: {
+				symbol,
+				token: API_KEY,
+			},
+		});
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching company profile:", error);
+	}
+};
+
+export const searchStocks2 = async (query: string) => {
 	try {
 		const response = await finnhubClient.get("/search", {
 			params: {
@@ -32,12 +51,21 @@ export const searchStocks = async (query: string) => {
 		return response.data;
 	} catch (error) {
 		console.error("Error searching for stocks:", error);
-		throw error;
+	}
+};
+export const searchStocks = async (query: string) => {
+	try {
+		const response = await alphaClient.get(
+			`/query?function=SYMBOL_SEARCH&keywords=${query}&apikey=${API_KEY2}`
+		);
+		return response.data;
+	} catch (error) {
+		console.error("Error searching for stocks:", error);
 	}
 };
 
 export const getStockData = async () => {
-	const topStockSymbols = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"];
+	const topStockSymbols = ["AAPL", "MSFT", "TSLA", "GOOGL", "ABNB", "AMZN"];
 
 	try {
 		const [quoteResponses, profileResponses] = await Promise.all([

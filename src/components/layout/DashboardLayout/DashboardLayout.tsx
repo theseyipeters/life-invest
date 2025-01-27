@@ -29,6 +29,7 @@ import { searchStocks2 } from "@/lib/finnhub";
 import Links from "./Links";
 import { IStockResult } from "@/types/stockTypes";
 import Link from "next/link";
+import StockModal from "@/components/modals/StockModal/StockModal";
 
 export const DashboardLayout: React.FC<{
 	children: React.ReactNode;
@@ -36,9 +37,12 @@ export const DashboardLayout: React.FC<{
 }> = ({ children }) => {
 	const isMobile = useMediaQuery("(max-width: 768px)");
 	const [opened, { toggle }] = useDisclosure();
+	const [selectedSymbol, setSelectedSymbol] = useState("");
 	const [query, setQuery] = useState("");
 	const [debouncedQuery] = useDebouncedValue(query, 300);
 	const [actions, setActions] = useState<SpotlightActionData[]>([]);
+	const [showModal, setShowModal] = useState<boolean>(false);
+	const [loading, setLoading] = useState<boolean>(false);
 
 	useEffect(() => {
 		const fetchStocks = async () => {
@@ -46,13 +50,11 @@ export const DashboardLayout: React.FC<{
 				setActions([]);
 				return;
 			}
+			setLoading(true);
 
 			try {
 				const response = await searchStocks2(debouncedQuery);
 				const bestMatches = response?.result;
-				const information = response?.Information;
-				console.log(response);
-				console.log(information);
 
 				if (bestMatches && Array.isArray(bestMatches)) {
 					const stockActions = bestMatches.map((stock: IStockResult) => ({
@@ -61,17 +63,22 @@ export const DashboardLayout: React.FC<{
 						description: `Symbol: ${stock.symbol} ${
 							stock.type && `- Type: ${stock.type}`
 						}`,
-						onClick: () => console.log(`Navigate to ${stock.symbol}`),
+						onClick: () => {
+							setSelectedSymbol(stock.symbol);
+							setShowModal(true);
+						},
 					}));
-
+					setLoading(false);
 					setActions(stockActions);
 				} else {
+					setLoading(false);
 					setActions([]);
 				}
 			} catch (error) {
 				console.error("Error fetching stocks:", error);
 				setActions([]);
 			} finally {
+				setLoading(false);
 			}
 		};
 
@@ -121,7 +128,9 @@ export const DashboardLayout: React.FC<{
 					}
 				/>
 				<Spotlight.ActionsList>
-					{items.length > 0 ? (
+					{loading ? (
+						<Spotlight.Empty>Loading...</Spotlight.Empty>
+					) : items.length > 0 ? (
 						items
 					) : (
 						<Spotlight.Empty>No results found...</Spotlight.Empty>
@@ -206,6 +215,12 @@ export const DashboardLayout: React.FC<{
 					{children}
 				</AppShell.Main>
 			</AppShell>
+
+			<StockModal
+				symbol={selectedSymbol}
+				opened={showModal}
+				close={() => setShowModal(false)}
+			/>
 		</>
 	);
 };

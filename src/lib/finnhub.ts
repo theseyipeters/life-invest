@@ -116,3 +116,47 @@ export const getStockData = async () => {
 		throw error;
 	}
 };
+
+export const getSingleStockData = async (symbol: string) => {
+	try {
+		const [quoteResponse, profileResponse] = await Promise.all([
+			finnhubClient.get("/quote", {
+				params: {
+					symbol,
+					token: API_KEY,
+				},
+			}),
+			finnhubClient.get("/stock/profile2", {
+				params: {
+					symbol,
+					token: API_KEY,
+				},
+			}),
+		]);
+
+		const stockData = {
+			symbol,
+			price: quoteResponse.data.c,
+			change: quoteResponse.data.d,
+			changePercent: (
+				(quoteResponse.data.d / quoteResponse.data.pc) *
+				100
+			).toFixed(2),
+			volume: quoteResponse.data.v,
+			high: quoteResponse.data.h,
+			low: quoteResponse.data.l,
+			open: quoteResponse.data.o,
+			name: profileResponse.data.name,
+			logo: profileResponse.data.logo,
+			industry: profileResponse.data.finnhubIndustry,
+			marketCap: profileResponse.data.marketCapitalization,
+			website: profileResponse.data.weburl,
+		};
+
+		return stockData;
+	} catch (error) {
+		console.log(error);
+		console.error(`Error fetching stock data for ${symbol}:`, error);
+		throw error;
+	}
+};

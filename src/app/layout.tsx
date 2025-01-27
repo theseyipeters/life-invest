@@ -1,5 +1,6 @@
 import { MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "@mantine/spotlight/styles.css";
 import "./globals.css";
 import React from "react";
 
